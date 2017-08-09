@@ -1,198 +1,204 @@
-/*********************************/
-/*MAIN FUNCTION: TestMyString.cpp*/
-/*********************************/
-#include <iostream>
+/********************************/
+/* SOURCE CLASS myString.cpp    */
+/********************************/
+#include <iostream> 
+#include <string.h>
 #include "myString.h"
 using namespace std;
-//--------------------------------------------------------------------
-//
-//  Function prototype
 
-void copyTester(myString copymyString);   // copymyString is passed by value
-void print_help();
-
-//--------------------------------------------------------------------
-
-int main()
+myString::myString(const char*  charString)
+//Constructor by initialisation, will be called when an array of char is given as parameter 
 {
-    myString a("a"),                // Predefined test myString objects
-        alp("alp"),
-        alpha("alpha"),
-        epsilon("epsilon"),
-        empty,
-        assignmyString,          // Destination for assignment
-        inputmyString;           // Input myString object
-    int n;                        // Input subscript
-    char ch,                      // Character specified by subscript
-        selection;        // Input test selection
-// Displays options to user.
-    print_help();
+//The private member myStringSize is assigned with the length of the array of char given in parameter increased from 1, an extra space is allocated for a null character (\0) 
+    myStringSize = strlen(charString) + 1;
+//An array of char from the length of the one given in parameter plus 1 is created     
+    Arr = new char[myStringSize];
+//The array passed in parameter is copied in the one we just created 
+    strcpy(Arr, charString);
+}
 
-    //User selects a test to do.
-    cin >> selection;
+myString::myString(const myString &other)
+//Copy constructor, will be used if:
+//- a myString object is returned by a function
+//- a myString object is given as parameter by value to a function
+//- a myString object is assigned by another using overload from opetator =
+{
+//The private member myStringSize is assigned with the same value than the myStringSize member from the myString object given in patameter 
+    myStringSize = other.myStringSize;
+//An array of char from same length than the one from the myString object given in parameter is created    
+    Arr = new char[myStringSize];
+//The array from the myString object passed in parameter is copied in the one we just created      
+    strcpy(Arr , other.Arr);
+}
 
-    cout << endl;
-//The selected test is evaluated
-    switch (selection)
+myString::~myString()
+//Destructor, frees memory that was allocated to the array of char 
+{
+    delete []Arr;
+//And sets its size to 0    
+    myStringSize = 0;
+}
+
+friend istream & operator >>(istream& input, myString& inputmyString)
+//Overload from operator >>, it allows to assign a text introduced through the keyboard to the array of char from a new myString object 
+{
+//A new array of char from size 100 is declared    
+    char tempArr[100];
+//The input value is cut to the length from the temporary array of char if bigger then assigned to it            
+    input >> setw(100) >> tempArr;
+//The temporary array of char is assigned as parameter to a new myString object   
+    inputmyString = tempArr; 
+//input is returned    
+    return input; 
+}
+    
+friend ostream & operator <<(ostream& output, const myString& outputmyString)
+//Overload from operator <<, it allows to display the private members from a myString object thanks to cout
+{
+//Assigns output with the text and size from the array of char 
+    output << "\nText : " << outputmyString.Arr << "\nSize : " << strlen(outputmyString.Arr) << "\n" << endl;
+//And returns it    
+    return output;     
+}
+
+myString myString::operator =(const myString &other)
+//Overload from the operator =, it allows us to assign the private members from a myString object with the values from the private members from another myString object given in parameter 
+{
+//If the myString given in parameter is not having the same length than the one that is assigned, 
+    if(other.myStringSize != this->myStringSize)
     {
-        case '1':
-        // Test 1 : Tests the constructors. Displays the myString objects that have been created
-        cout << "Structure of various myString objects: " << endl;
-        cout << "myString object: alpha" << endl;
-        alpha.print();
-        alpha.showStructure();
-        cout << "myString object: epsilon" << endl;
-        epsilon.print();
-        epsilon.showStructure();
-        cout << "myString object: a" << endl;
-        a.print();
-        a.showStructure();
-        cout << "empty myString object" << endl;
-        empty.print();
-        empty.showStructure();
-        break;
-
-    case '2':
-        // Test 2 : Tests the length operation.
-        cout << "Lengths of various myString object:" << endl;
-        cout << " alpha   : " << alpha.getLength() << endl;
-        cout << " epsilon : " << epsilon.getLength() << endl;
-        cout << " a       : " << a.getLength() << endl;
-        cout << " empty   : " << empty.getLength() << endl;
-        break;
-
-    case '3':
-        // Test 3 : Tests the subscript operation.
-        cout << "Enter a subscript : ";
-        cin >> n;
-        ch = alpha[n];
-        cout << "  alpha[" << n << "] : ";
-        if (ch == '\0')
-            cout << "\\0" << endl;
-        else
-            cout << ch << endl;
-        break;
-
-    case '4':
-        // Test 4 : Tests the assignment and clear operations. The myString object "assignmyString" is assigned with other myString objects tnanks to the overload from the operator =
-        cout << "Assignments:" << endl;
-        cout << "assignmyString = alpha" << endl;
-        assignmyString = alpha;
-        assignmyString.showStructure();
-        cout << "assignmyString = a" << endl;
-        assignmyString = a;
-        assignmyString.showStructure();
-        cout << "assignmyString = empty" << endl;
-        assignmyString = empty;
-        assignmyString.showStructure();
-        cout << "assignmyString = epsilon" << endl;
-        assignmyString = epsilon;
-        assignmyString.showStructure();
-        cout << "assignmyString = assignmyString" << endl;
-        assignmyString = assignmyString;
-        assignmyString.showStructure();
-        cout << "assignmyString = alpha" << endl;
-        assignmyString = alpha;
-        assignmyString.showStructure();
-        cout << "Clear assignmyString" << endl;
-        assignmyString.clear();
-        assignmyString.showStructure();
-        cout << "Confirm that alpha has not been cleared" << endl;
-        alpha.showStructure();
-        break;
-
-    case '5':
-        // Test 5 : Tests the copy constructor and operator= operations.
-        cout << "Calls by value:" << endl;
-        cout << "alpha before call" << endl;
-        alpha.showStructure();
-        copyTester(alpha);
-        cout << "alpha after call" << endl;
-        alpha.showStructure();
-
-        cout << "a before call" << endl;
-        a.showStructure();
-        a = epsilon;
-        cout << "a after call" << endl;
-        a.showStructure();
-        cout << "epsilon after call" << endl;
-        epsilon.showStructure();
-        break;
-
-    case '6':
-        // Test 6 : Tests toUpper and toLower
-        cout << "Testing toUpper and toLower."
-            << "Enter a mixed case string: " << endl;
-        cin >> inputmyString;
-        cout << "Input string:" << endl;
-        inputmyString.showStructure();
-        cout << "Upper case copy: " << endl;
-        inputmyString.toUpper().showStructure();
-        cout << "Lower case copy: " << endl;
-        inputmyString.toLower().showStructure();
-        break;
-
-    case '7':
-        // Test 7 : Tests the relational operations and displays the relations existing between different myString objects.
-        cout << "  left     right     <   ==   > " << endl;
-        cout << "--------------------------------" << endl;
-        cout << " alpha    epsilon    " << (alpha<epsilon)
-            << "    " << (alpha == epsilon) << "   "
-            << (alpha>epsilon) << endl;
-        cout << " epsilon   alpha     " << (epsilon<alpha)
-            << "    " << (epsilon == alpha) << "   "
-            << (epsilon>alpha) << endl;
-        cout << " alpha     alpha     " << (alpha<alpha) << "    "
-            << (alpha == alpha) << "   " << (alpha>alpha) << endl;
-        cout << "  alp      alpha     " << (alp<alpha) << "    "
-            << (alp == alpha) << "   " << (alp>alpha) << endl;
-        cout << " alpha      alp      " << (alpha<alp) << "    "
-            << (alpha == alp) << "   " << (alpha>alp) << endl;
-        cout << "   a       alpha     " << (a<alpha) << "    "
-            << (a == alpha) << "   " << (a>alpha) << endl;
-        cout << " alpha       a       " << (alpha<a) << "    "
-            << (alpha == a) << "   " << (alpha>a) << endl;
-        cout << " empty     alpha     " << (empty<alpha) << "    "
-            << (empty == alpha) << "   " << (empty>alpha) << endl;
-        cout << " alpha     empty     " << (alpha<empty) << "    "
-            << (alpha == empty) << "   " << (alpha>empty) << endl;
-        cout << " empty     empty     " << (empty<empty) << "    "
-            << (empty == empty) << "   " << (empty>empty) << endl;
-        break;
-
-    default:
-        cout << "'" << selection << "' specifies an inactive or invalid test" << endl;
+//We delete the existing array   
+        delete []Arr;
+//We adjust its size to the size of the parameter   
+        this->myStringSize = other.myStringSize;
+//A new array from that size is created        
+        Arr = new char[this->myStringSize];
     }
-
-    return 0;
+//It is now assigned with the value from the one from the myString object given in parameter 
+    strcpy(this->Arr ,other.Arr);
+//The myString object that was assigned with new values is now returned   
+    return *this;    
 }
 
-//--------------------------------------------------------------------
-
-void copyTester(myString copymyString)
-
-// Dummy routine that is passed a myString object using call by value. Outputs
-// copymyString and clears it.
-
+char myString::operator [](int n) const
+//Overload from the opetator [], it allows us to access the member from the array contained in the myString object which index is given inside the []
 {
-    cout << "Copy of myString object" << endl;
-    copymyString.showStructure();
-    cout << "Clear copy" << endl;
-    copymyString.clear();
-    copymyString.showStructure();
+//Returns the required member from the array 
+    return this->Arr[n];
 }
 
-//--------------------------------------------------------------------
-
-void print_help()
+bool myString::operator ==(const myString& other) const
+//Overload from the opetator ==, it allows us to compare 2 myString objects and see if they are the sames (what means if their private members are having the same values)
 {
-    cout << endl << "Tests:" << endl;
-    cout << "  1  Tests the constructors" << endl;
-    cout << "  2  Tests the length operation" << endl;
-    cout << "  3  Tests the subscript operation" << endl;
-    cout << "  4  Tests the assignment and clear operations" << endl;
-    cout << "  5  Tests the copy constructor and operator= operations" << endl;
-    cout << "  6  Tests the toUpper and toLower operations      " << endl;
-    cout << "  7  Tests the relational operations    " << endl;
-    cout << "Select the test to run : "<<endl;
+//strcmp returns 0 if the items compared are the sames, return from the function strcmp is evaluated with the value of 0, if strcmp returns 0, true is returned, if the 2 items are different, strcmp doesn't return 0, then the return value is false 
+    return strcmp(this->Arr,other.Arr) == 0;
+}
+    
+bool myString::operator <(const myString& other) const
+//Overload from the opetator <, it allows us to compare 2 myString objects 
+{
+//strcmp returns -1 if the item from left value is lexicographically smaller compared to the one given in parameter. If strcmp returns -1, the expression is evaluated to true and true is returned. Else, return value is false. 
+    return strcmp(this->Arr,other.Arr) < 0;    
+}
+
+bool myString::operator >(const myString& other) const
+//Overload from the opetator >, it allows us to compare 2 myString objects 
+{
+//strcmp returns 1 if the item from left value is lexicographically bigger compared to the one given in parameter. If strcmp returns 1, the expression is evaluated to true and true is returned. Else, return value is false.
+    return strcmp(this->Arr,other.Arr) > 0;    
+}
+
+void myString::clear()
+//Called to delete the values from the data members from a myString object
+{
+//delete calls the destructor from the Class 
+    delete this; 
+}
+
+int myString::getLength() const
+//Called to know the length from a myString object
+{
+//Returns the length from the array of char contained in the myString object 
+    return strlen(this->Arr); 
+}
+
+void myString::print() const
+//Prints the text contained in the array private member 
+{
+//Loops in the array 
+    for(int x = 0; x < myStringSize - 1; x++)
+    {
+//And prints each char one y one     
+        cout << this->Arr[x];
+    }
+//Goes to the next line    
+    cout << "\n";
+}
+
+void myString::showStructure() const
+//Will display the index numbers and the text from the array
+{
+//Loops in the array 
+    for(int x = 0; x < myStringSize; x++) 
+    {
+//While index from the array is smaller than 10    
+        if(x < 10)
+        {
+//index is displayed separated with 2 tabulations        
+            cout << x << "\t\t"
+;    
+        }
+        else
+//When index reaches 10         
+        {
+//Index values are now separated only by 1 tabulation        
+            cout << x << "\t"
+;     
+        }
+    } 
+//Goes to the next line    
+    cout << endl;
+    
+    for(int x = 0; x < myStringSize - 1; x++)
+//Loop to read the array 
+    {
+//A char is created and given the value from the char that was just read in the array   
+        char c = this->Arr[x];
+//Each char is displayed separated with 2 tabulations         
+        cout << c << "\t\t";
+    }
+//A null character is displayed on screen at the end of the string     
+    cout << "\\o\n" << endl;
+}
+
+myString myString::toUpper() const 
+//Sets the myString array of char to uppercase 
+{
+//A new array of char from size 100 is created 
+    char tempArr[100];
+    for(int x = 0; x < myStringSize; x++)
+//Loops in the array of char from the myString object and copy each char set to uppercase in the new array     
+    {
+        tempArr[x] = toupper(this->Arr[x]);
+    }
+//The new array of char set to uppercase is given as parameter to create a new myString object    
+    myString tempMyStr(tempArr);
+//The new myString object is returned        
+    return tempMyStr;
+}
+                         
+myString myString::toLower() const
+//Sets the myString array of char to lowercase 
+{
+//A new array of char from size 100 is created 
+    char tempArr[100];
+    for(int x = 0; x < myStringSize; x++)
+//Loops in the array of char from the myString object and copy each char set to lowercase in the new array    
+    {
+        tempArr[x] = tolower(this->Arr[x]);
+    }
+//The new array of char set to lowercase is given as parameter to create a new myString object    
+    myString tempMyStr(tempArr);
+//The new myString object is returned        
+    return tempMyStr; 
 }
